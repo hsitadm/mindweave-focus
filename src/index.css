@@ -2,12 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* Modern Design System with enhanced colors, gradients, and animations */
 
 @layer base {
   :root {
+    /* Enhanced color palette */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -17,7 +16,7 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -34,25 +33,35 @@ All colors MUST be HSL.
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 262.1 83.3% 57.8%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
+    /* Modern gradient variables */
+    --gradient-primary: linear-gradient(135deg, hsl(262.1 83.3% 57.8%) 0%, hsl(292.1 83.3% 67.8%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(210 40% 96.1%) 0%, hsl(220 40% 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(262.1 83.3% 57.8% / 0.1) 0%, hsl(292.1 83.3% 67.8% / 0.1) 100%);
+    
+    /* Glass morphism */
+    --glass-bg: rgba(255, 255, 255, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.18);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+
+    /* Sidebar enhanced */
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
+    --sidebar-primary: 262.1 83.3% 57.8%;
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 262.1 83.3% 57.8%;
 
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    /* Status colors */
+    --status-pending: 45 93% 47%;
+    --status-progress: 217 91% 60%;
+    --status-done: 142 76% 36%;
+    --status-overdue: 0 84% 60%;
   }
 
   .dark {
@@ -65,7 +74,7 @@ All colors MUST be HSL.
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
+    --primary: 262.1 83.3% 57.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -82,15 +91,26 @@ All colors MUST be HSL.
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
+    --ring: 262.1 83.3% 57.8%;
+
+    /* Dark mode gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(262.1 83.3% 57.8%) 0%, hsl(292.1 83.3% 67.8%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(217.2 32.6% 17.5%) 0%, hsl(227.2 32.6% 20%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(262.1 83.3% 57.8% / 0.2) 0%, hsl(292.1 83.3% 67.8% / 0.2) 100%);
+    
+    /* Dark glass morphism */
+    --glass-bg: rgba(0, 0, 0, 0.25);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary: 262.1 83.3% 57.8%;
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 262.1 83.3% 57.8%;
   }
 }
 
@@ -101,5 +121,210 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+    background: radial-gradient(ellipse at top, hsl(var(--primary) / 0.05) 0%, transparent 50%);
+  }
+
+  /* Smooth scrolling */
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@layer components {
+  /* Glass morphism utility */
+  .glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
+  /* Modern gradient backgrounds */
+  .gradient-primary {
+    background: var(--gradient-primary);
+  }
+
+  .gradient-secondary {
+    background: var(--gradient-secondary);
+  }
+
+  .gradient-accent {
+    background: var(--gradient-accent);
+  }
+
+  /* ReactFlow specific styles */
+  .react-flow__viewport {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .react-flow__container {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  /* Enhanced animations */
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  .animate-slide-out-right {
+    animation: slideOutRight 0.3s ease-out;
+  }
+
+  /* Status indicators */
+  .status-pending {
+    @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+  }
+
+  .status-progress {
+    @apply bg-blue-100 text-blue-800 border-blue-200;
+  }
+
+  .status-done {
+    @apply bg-green-100 text-green-800 border-green-200;
+  }
+
+  .status-overdue {
+    @apply bg-red-100 text-red-800 border-red-200;
+  }
+
+  .dark .status-pending {
+    @apply bg-yellow-900/20 text-yellow-300 border-yellow-800;
+  }
+
+  .dark .status-progress {
+    @apply bg-blue-900/20 text-blue-300 border-blue-800;
+  }
+
+  .dark .status-done {
+    @apply bg-green-900/20 text-green-300 border-green-800;
+  }
+
+  .dark .status-overdue {
+    @apply bg-red-900/20 text-red-300 border-red-800;
+  }
+}
+
+@layer utilities {
+  /* Custom shadows */
+  .shadow-glow {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  .shadow-soft {
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Text gradients */
+  .text-gradient {
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+/* Keyframes */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(100%); opacity: 0; }
+}
+
+/* ReactFlow custom styles */
+.react-flow__node-task {
+  @apply animate-scale-in;
+}
+
+.react-flow__edge {
+  @apply transition-all duration-300;
+}
+
+.react-flow__edge.animated {
+  stroke-dasharray: 5;
+  animation: dashdraw 0.5s linear infinite;
+}
+
+/* Node Resizer Styles */
+.react-flow__resize-control {
+  background: hsl(var(--primary));
+  border: 2px solid white;
+  border-radius: 4px;
+  width: 8px;
+  height: 8px;
+}
+
+.react-flow__resize-control:hover {
+  background: hsl(var(--primary) / 0.8);
+  transform: scale(1.2);
+  transition: all 0.2s ease;
+}
+
+.react-flow__resize-control.top,
+.react-flow__resize-control.bottom {
+  cursor: ns-resize;
+}
+
+.react-flow__resize-control.left,
+.react-flow__resize-control.right {
+  cursor: ew-resize;
+}
+
+.react-flow__resize-control.top-left,
+.react-flow__resize-control.bottom-right {
+  cursor: nw-resize;
+}
+
+.react-flow__resize-control.top-right,
+.react-flow__resize-control.bottom-left {
+  cursor: ne-resize;
+}
+
+/* Resize line styles */
+.react-flow__resize-control-line {
+  border-color: hsl(var(--primary) / 0.5);
+  border-width: 1px;
+}
+
+@keyframes dashdraw {
+  to {
+    stroke-dashoffset: -10;
   }
 }

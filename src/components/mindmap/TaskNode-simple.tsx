@@ -1,9 +1,8 @@
-import { memo, useState, useRef, useCallback } from "react";
+import { memo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { 
-  CalendarDays, 
   ChevronDown, 
   ChevronRight, 
   Focus, 
@@ -12,10 +11,9 @@ import {
   Clock,
   CheckCircle2,
   Circle,
-  PlayCircle,
-  Move3D
+  PlayCircle
 } from "lucide-react";
-import { Handle, Position, NodeResizer } from "@xyflow/react";
+import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 import { cn } from "@/lib/utils";
 
@@ -79,7 +77,6 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
   const d = data as TaskData;
   const config = statusConfig[d.status];
   const StatusIcon = config.icon;
-  const [isResizing, setIsResizing] = useState(false);
   
   // Default dimensions
   const width = d.width || 280;
@@ -92,7 +89,7 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
       "ring-2 ring-red-500/50 shadow-red-500/20": d.highlight === "overdue",
       "ring-2 ring-yellow-500/50 shadow-yellow-500/20": d.highlight === "soon",
       "ring-2 ring-primary/50 shadow-primary/20": selected,
-      "hover:scale-[1.02]": !selected && !isResizing,
+      "hover:scale-[1.02]": !selected,
       "scale-[1.02]": selected
     }
   );
@@ -101,28 +98,11 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
                        d.progress >= 75 ? "bg-blue-500" : 
                        d.progress >= 50 ? "bg-yellow-500" : "bg-gray-400";
 
-  const handleResize = useCallback((event: any, params: any) => {
-    const newWidth = Math.max(250, params.width);
-    const newHeight = Math.max(180, params.height);
-    d.onResize?.(id, newWidth, newHeight);
-  }, [id, d]);
-
   return (
     <article 
       className={cardClasses}
       style={{ width: `${width}px`, height: `${height}px` }}
     >
-      {/* Node Resizer */}
-      <NodeResizer
-        color="#8b5cf6"
-        isVisible={selected}
-        minWidth={250}
-        minHeight={180}
-        onResize={handleResize}
-        onResizeStart={() => setIsResizing(true)}
-        onResizeEnd={() => setIsResizing(false)}
-      />
-
       <Handle 
         type="target" 
         position={Position.Left} 
@@ -133,13 +113,6 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
         position={Position.Right} 
         className="!w-3 !h-3 !bg-primary/60 !border-2 !border-white" 
       />
-      
-      {/* Resize Indicator */}
-      {selected && (
-        <div className="absolute top-2 right-2 opacity-50 pointer-events-none">
-          <Move3D className="h-4 w-4 text-primary" />
-        </div>
-      )}
       
       {/* Header */}
       <header className="p-4 border-b border-border/50">
@@ -159,15 +132,7 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
           </button>
           
           <div className="flex-1 min-w-0">
-            <h3 
-              className="font-semibold text-sm leading-tight mb-2"
-              style={{
-                display: '-webkit-box',
-                WebkitLineClamp: Math.max(2, Math.floor((height - 120) / 40)),
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}
-            >
+            <h3 className="font-semibold text-sm leading-tight mb-2 line-clamp-2">
               {d.title}
             </h3>
             
@@ -208,20 +173,8 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
           </div>
           <div className="relative">
             <Progress value={d.progress} className="h-2" />
-            <div 
-              className={cn(
-                "absolute top-0 left-0 h-2 rounded-full transition-all duration-500",
-                progressColor
-              )}
-              style={{ width: `${d.progress}%` }}
-            />
           </div>
         </div>
-
-        {/* Spacer for larger cards */}
-        {height > 220 && (
-          <div className="flex-1 min-h-4" />
-        )}
 
         {/* Actions */}
         <div className="flex items-center gap-1.5 mt-4">
@@ -235,7 +188,7 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
             }}
           >
             <PlusCircle className="h-3.5 w-3.5" />
-            {width > 250 ? "Subtarea" : "+"}
+            Subtarea
           </Button>
           
           <Button 
