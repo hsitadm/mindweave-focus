@@ -240,6 +240,12 @@ const Index = () => {
 
   // Node types
   const nodeTypes = useMemo(() => ({ task: TaskNode }), []);
+  const defaultEdgeOptions = useMemo(() => ({
+    type: 'smoothstep' as const,
+    animated: true,
+    markerEnd: { type: MarkerType.ArrowClosed },
+    style: { stroke: 'hsl(var(--muted-foreground))' }
+  }), []);
 
   // Selection handler
   const onSelectionChange = useCallback(({ nodes: nds }: { nodes: Node[] }) => {

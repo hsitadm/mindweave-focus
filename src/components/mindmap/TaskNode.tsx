@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CalendarDays, ChevronDown, ChevronRight, Focus, PlusCircle, Trash2 } from "lucide-react";
+import { Handle, Position } from "@xyflow/react";
 import type { NodeProps } from "@xyflow/react";
 
 export type Status = "pendiente" | "en_progreso" | "hecho";
@@ -49,12 +50,14 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
 
   return (
     <article className={`w-[260px] max-w-[280px] bg-card text-card-foreground rounded-lg overflow-hidden ${ringClass}`}>
+      <Handle type="target" position={Position.Left} className="custom-handle" />
+      <Handle type="source" position={Position.Right} className="custom-handle" />
       <header className="p-3 border-b">
         <div className="flex items-center gap-2">
           <button
-            className="inline-flex items-center justify-center shrink-0"
+            className="inline-flex items-center justify-center shrink-0 nodrag"
             aria-label={d.collapsed ? "Expandir" : "Colapsar"}
-            onClick={() => d.onToggleCollapse?.(id)}
+            onClick={(e) => { e.stopPropagation(); d.onToggleCollapse?.(id); }}
           >
             {d.collapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
@@ -79,15 +82,16 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
           <Progress value={d.progress} />
         </div>
         <div className="flex items-center gap-2 pt-1">
-          <Button size="sm" variant="secondary" onClick={() => d.onAddChild?.(id)}>
+          <Button size="sm" variant="secondary" className="nodrag" onClick={(e) => { e.stopPropagation(); d.onAddChild?.(id); }}>
             <PlusCircle className="h-4 w-4 mr-1" /> Subtarea
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => d.onFocus?.(id)}>
+          <Button size="sm" variant="ghost" className="nodrag" onClick={(e) => { e.stopPropagation(); d.onFocus?.(id); }}>
             <Focus className="h-4 w-4 mr-1" /> Foco
           </Button>
-          <Button size="sm" variant="ghost" onClick={() => d.onDelete?.(id)} aria-label="Eliminar">
+          <Button size="sm" variant="ghost" className="nodrag" onClick={(e) => { e.stopPropagation(); d.onDelete?.(id); }} aria-label="Eliminar">
             <Trash2 className="h-4 w-4" />
           </Button>
+
         </div>
       </div>
     </article>
