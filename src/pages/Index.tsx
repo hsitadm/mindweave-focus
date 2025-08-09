@@ -285,6 +285,7 @@ const Index = () => {
         taskCount={taskCount}
         completedCount={completedCount}
         onDataImported={handleDataImported}
+        tasks={tasks}
       />
 
       <main className={cn(

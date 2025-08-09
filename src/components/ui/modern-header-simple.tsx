@@ -2,23 +2,29 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { DataManager } from "@/components/ui/data-manager";
+import { ProductivityCounter } from "@/components/ui/productivity-counter";
 import { Plus, Focus, Minimize2, Sparkles, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useProductivityStats } from "@/hooks/useProductivityStats";
+import type { Task } from "@/pages/Index";
 
 interface ModernHeaderSimpleProps {
   onAddTask: () => void;
   taskCount: number;
   completedCount: number;
   onDataImported: (data: any) => void;
+  tasks: Record<string, Task>;
 }
 
 export function ModernHeaderSimple({
   onAddTask,
   taskCount,
   completedCount,
-  onDataImported
+  onDataImported,
+  tasks
 }: ModernHeaderSimpleProps) {
   const completionRate = taskCount > 0 ? Math.round((completedCount / taskCount) * 100) : 0;
+  const productivityStats = useProductivityStats(tasks);
 
   return (
     <header className="sticky top-0 z-50 w-full border-b glass backdrop-blur-xl">
@@ -50,6 +56,15 @@ export function ModernHeaderSimple({
               {completionRate}% completado
             </Badge>
           </div>
+
+          {/* Productivity Counter */}
+          <ProductivityCounter
+            tasksCompletedToday={productivityStats.tasksCompletedToday}
+            streakDays={productivityStats.streakDays}
+            weeklyProductivity={productivityStats.weeklyProductivity}
+            totalTasks={productivityStats.totalTasks}
+            completedTasks={productivityStats.completedTasks}
+          />
         </div>
 
         {/* Actions */}
