@@ -1,0 +1,59 @@
+/* React Flow Theme — adapted for our design system */
+.react-flow {
+  --xy-theme-selected: hsl(var(--primary));
+  --xy-theme-hover: hsl(var(--muted-foreground) / 0.4);
+  --xy-theme-edge-hover: hsl(var(--foreground));
+  --xy-theme-color-focus: hsl(var(--accent));
+
+  --xy-node-border-default: 1px solid hsl(var(--border));
+  --xy-node-boxshadow-default:
+    0 8px 24px -12px hsl(var(--ring) / 0.25),
+    0 2px 6px -2px hsl(var(--ring) / 0.2);
+  --xy-node-border-radius-default: 12px;
+  --xy-handle-background-color-default: hsl(var(--background));
+  --xy-handle-border-color-default: hsl(var(--muted-foreground));
+  --xy-edge-label-color-default: hsl(var(--muted-foreground));
+}
+
+.react-flow.dark {
+  --xy-node-boxshadow-default:
+    0 8px 24px -12px hsl(var(--ring) / 0.35),
+    0 2px 6px -2px hsl(var(--ring) / 0.3);
+  --xy-theme-color-focus: hsl(var(--accent));
+}
+
+.react-flow__node {
+  box-shadow: var(--xy-node-boxshadow-default);
+  border-radius: var(--xy-node-border-radius-default);
+  background-color: hsl(var(--card));
+  display: flex;
+  align-items: stretch;
+  text-align: left;
+  padding: 0;
+  border: var(--xy-node-border-default);
+  color: hsl(var(--card-foreground));
+}
+
+.react-flow__node.selectable:hover,
+.react-flow__node.draggable:hover {
+  border-color: hsl(var(--accent));
+}
+
+.react-flow__node.selectable.selected {
+  border-color: hsl(var(--primary));
+}
+
+.react-flow__node-group {
+  background-color: hsl(var(--secondary) / 0.4);
+  border-color: hsl(var(--accent));
+}
+
+.react-flow__handle {
+  background-color: hsl(var(--background));
+}
+
+.react-flow__handle.connectionindicator:focus,
+.react-flow__handle.connectingfrom,
+.react-flow__handle.connectingto {
+  border-color: hsl(var(--primary));
+}
