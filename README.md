@@ -1,73 +1,188 @@
-# Welcome to your Lovable project
+# 🧠 MindWeave Focus
 
-## Project info
+> **Una aplicación inteligente de mapas mentales con sidebar auto-ocultable y seguimiento de productividad**
 
-**URL**: https://lovable.dev/projects/41dcd8c3-517e-4d96-8f3f-b7ba93b3b68d
+MindWeave Focus es una herramienta moderna para la gestión visual de tareas y proyectos, diseñada para maximizar tu espacio de trabajo y mantener el foco en lo importante.
 
-## How can I edit this code?
+## ✨ Funcionalidades Principales
 
-There are several ways of editing your application.
+### 🎯 **Sidebar Inteligente**
+- **Auto-ocultar**: Se oculta automáticamente cuando no hay tarea seleccionada
+- **Máximo espacio**: Canvas se expande para aprovechar toda la pantalla
+- **Transiciones suaves**: Animaciones fluidas al mostrar/ocultar
+- **Responsive**: Se adapta perfectamente a diferentes tamaños de pantalla
 
-**Use Lovable**
+### 📊 **Contador de Productividad**
+- **📈 Tareas completadas hoy**: Seguimiento diario con indicador visual
+- **🔥 Racha de días**: Motivación con contador de días consecutivos trabajando
+- **📊 Productividad semanal**: Porcentaje de completitud con colores dinámicos
+- **🎯 Progreso total**: Vista general de todas tus tareas
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/41dcd8c3-517e-4d96-8f3f-b7ba93b3b68d) and start prompting.
+### 🎨 **Gestión Visual de Tareas**
+- **Redimensionamiento**: Ajusta el tamaño de las tarjetas según tus necesidades
+- **Estados dinámicos**: Pendiente, En Progreso, Completado con colores distintivos
+- **Fechas de vencimiento**: Alertas visuales para tareas próximas a vencer
+- **Conexiones intuitivas**: Crea relaciones entre tareas arrastrando
 
-Changes made via Lovable will be committed automatically to this repo.
+### 💾 **Sistema de Persistencia Robusto**
+- **Auto-guardado**: Todos los cambios se guardan automáticamente
+- **Sistema de respaldos**: Protección contra pérdida de datos
+- **Exportar/Importar**: Portabilidad completa de tus datos
+- **Indicador de guardado**: Feedback visual del estado de sincronización
 
-**Use your preferred IDE**
+## 🚀 Guía de Uso Rápida
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### **Primeros Pasos**
+1. **Crear tarea**: Haz clic en "Nueva Tarea" en el header
+2. **Editar tarea**: Selecciona cualquier tarjeta para ver el panel de edición
+3. **Conectar tareas**: Arrastra desde el punto de conexión de una tarjeta a otra
+4. **Redimensionar**: Selecciona una tarjeta y arrastra las esquinas
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### **Maximizar Espacio de Trabajo**
+- **Haz clic en espacio vacío** → El sidebar se oculta automáticamente
+- **Haz clic en una tarjeta** → El sidebar aparece con los detalles
+- **Usa el minimapa** → Navega fácilmente por mapas grandes
 
-Follow these steps:
+### **Seguimiento de Productividad**
+- **Marca tareas como completadas** → Ve tu progreso en tiempo real
+- **Observa tu racha** → Mantén la motivación día a día
+- **Revisa tu porcentaje semanal** → Colores indican tu rendimiento
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🛠️ Desarrollo Local
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+### **Requisitos**
+- Node.js 18+ 
+- npm o yarn
 
-# Step 3: Install the necessary dependencies.
-npm i
+### **Instalación**
+```bash
+# Clonar el repositorio
+git clone https://github.com/hsitadm/mindweave-focus.git
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Navegar al directorio
+cd mindweave-focus
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### **Scripts Disponibles**
+```bash
+npm run dev          # Servidor de desarrollo
+npm run build        # Build de producción
+npm run preview      # Preview del build
+npm run lint         # Linting del código
+```
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🏗️ Arquitectura Técnica
 
-**Use GitHub Codespaces**
+### **Stack Tecnológico**
+- **Frontend**: React 18 + TypeScript
+- **Styling**: Tailwind CSS + shadcn/ui
+- **Mapas**: ReactFlow para visualización interactiva
+- **Build**: Vite para desarrollo rápido
+- **Estado**: React Hooks + Context API
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### **Componentes Principales**
+```
+src/
+├── components/
+│   ├── mindmap/
+│   │   └── TaskNode.tsx          # Nodo de tarea redimensionable
+│   └── ui/
+│       ├── modern-sidebar.tsx    # Sidebar inteligente
+│       ├── productivity-counter.tsx # Contador de productividad
+│       ├── data-manager.tsx      # Gestión de datos
+│       └── save-indicator.tsx    # Indicador de guardado
+├── hooks/
+│   ├── useSidebar.ts            # Lógica del sidebar auto-hide
+│   └── useProductivityStats.ts  # Cálculos de productividad
+└── lib/
+    └── storage.ts               # Sistema de persistencia robusto
+```
 
-## What technologies are used for this project?
+## 🎨 Funcionalidades Avanzadas
 
-This project is built with:
+### **Sistema de Temas**
+- Modo claro/oscuro automático
+- Colores adaptativos según productividad
+- Animaciones suaves y transiciones
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### **Gestión de Datos**
+- Exportación en formato JSON
+- Importación con validación
+- Migración automática de versiones
+- Respaldos automáticos locales
 
-## How can I deploy this project?
+### **Experiencia de Usuario**
+- Atajos de teclado intuitivos
+- Feedback visual inmediato
+- Diseño responsive completo
+- Accesibilidad optimizada
 
-Simply open [Lovable](https://lovable.dev/projects/41dcd8c3-517e-4d96-8f3f-b7ba93b3b68d) and click on Share -> Publish.
+## 🔄 Flujo de Desarrollo
 
-## Can I connect a custom domain to my Lovable project?
+Este proyecto sigue un flujo Git profesional:
 
-Yes, you can!
+```bash
+# 1. Crear rama para nueva funcionalidad
+git checkout -b feature/nueva-funcionalidad
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+# 2. Desarrollar y probar
+# ... hacer cambios ...
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+# 3. Commit descriptivo
+git add .
+git commit -m "feat: descripción clara"
+
+# 4. Merge a main
+git checkout main
+git merge feature/nueva-funcionalidad
+git push origin main
+
+# 5. Limpiar rama temporal
+git branch -d feature/nueva-funcionalidad
+```
+
+## 📈 Roadmap
+
+### **Próximas Funcionalidades**
+- [ ] **Templates de tareas**: Plantillas predefinidas para proyectos comunes
+- [ ] **Colaboración en tiempo real**: Trabajo en equipo sincronizado
+- [ ] **Integración con calendarios**: Sincronización con Google Calendar
+- [ ] **Modo presentación**: Vista optimizada para mostrar mapas
+- [ ] **Análisis avanzado**: Métricas detalladas de productividad
+
+### **Mejoras Técnicas**
+- [ ] **PWA**: Aplicación web progresiva para uso offline
+- [ ] **Sincronización en la nube**: Backup automático en servicios cloud
+- [ ] **API REST**: Backend para funcionalidades avanzadas
+- [ ] **Tests automatizados**: Cobertura completa de testing
+
+## 🤝 Contribuir
+
+¿Quieres contribuir? ¡Genial! Sigue estos pasos:
+
+1. **Fork** el repositorio
+2. **Crea una rama** para tu funcionalidad (`git checkout -b feature/mi-funcionalidad`)
+3. **Commit** tus cambios (`git commit -m 'feat: agregar mi funcionalidad'`)
+4. **Push** a la rama (`git push origin feature/mi-funcionalidad`)
+5. **Abre un Pull Request**
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 🔗 Enlaces
+
+- **🌐 Demo en vivo**: [MindWeave Focus](https://lovable.dev/projects/41dcd8c3-517e-4d96-8f3f-b7ba93b3b68d)
+- **📚 Documentación**: Este README
+- **🐛 Reportar bugs**: [GitHub Issues](https://github.com/hsitadm/mindweave-focus/issues)
+- **💡 Solicitar funcionalidades**: [GitHub Discussions](https://github.com/hsitadm/mindweave-focus/discussions)
+
+---
+
+**Desarrollado con ❤️ para maximizar tu productividad y mantener el foco en lo importante.**
