@@ -98,9 +98,51 @@ const Index = () => {
   const sidebar = useSidebar({ selectedId });
 
   // Helpers
-  const addTask = useCallback((title = "Nueva tarea", parentId: string | null = null) => {
+  // Helper function to find optimal position for new subtask
+  const findOptimalSubtaskPosition = useCallback((parentId: string) => {
+    const parent = nodes.find((n) => n.id === parentId);
+    if (!parent) return { x: 200, y: 200 };
+
+    // Get all existing children of this parent
+    const childrenEdges = edges.filter(e => e.source === parentId);
+    const childrenNodes = childrenEdges.map(e => nodes.find(n => n.id === e.target)).filter(Boolean);
+
+    // Base position: to the right of parent
+    const baseX = parent.position.x + 350;
+    const baseY = parent.position.y;
+
+    // If no children, place at base position
+    if (childrenNodes.length === 0) {
+      return { x: baseX, y: baseY };
+    }
+
+    // Find the lowest Y position among children and place below
+    const childrenYPositions = childrenNodes.map(child => child!.position.y);
+    const lowestY = Math.max(...childrenYPositions);
+    
+    return { 
+      x: baseX, 
+      y: lowestY + 150 // Space below the lowest child
+    };
+  }, [nodes, edges]);
+
+  const addTask = useCallback((title = "Nueva tarea", parentId: string | null = null, customPosition?: { x: number; y: number }) => {
     const id = crypto.randomUUID();
     const task: Task = { id, title, status: "pendiente", progress: 0, parentId, width: 280, height: 200 };
+    
+    // Calcular posición inteligente
+    let position = customPosition;
+    
+    if (!position) {
+      if (parentId) {
+        // Para subtareas, usar algoritmo optimizado
+        position = findOptimalSubtaskPosition(parentId);
+      } else {
+        // Para tareas raíz, posición aleatoria como antes
+        position = { x: (Math.random() - 0.5) * 400, y: (Math.random() - 0.5) * 200 };
+      }
+    }
+
     const node: Node = {
       id,
       type: "task",
@@ -111,7 +153,7 @@ const Index = () => {
         width: task.width,
         height: task.height
       } as TaskData,
-      position: { x: (Math.random() - 0.5) * 400, y: (Math.random() - 0.5) * 200 },
+      position,
     };
 
     setTasks((prev) => ({ ...prev, [id]: task }));
@@ -125,7 +167,7 @@ const Index = () => {
       }));
     }
     setSelectedId(id);
-  }, [setEdges, setNodes]);
+  }, [setEdges, setNodes, findOptimalSubtaskPosition]);
 
   const updateTask = useCallback((id: string, partial: Partial<Task>) => {
     setTasks((prev) => ({ ...prev, [id]: { ...prev[id], ...partial } }));
@@ -145,10 +187,8 @@ const Index = () => {
   }, [setNodes]);
 
   const handleAddChild = useCallback((parentId: string) => {
-    const parent = nodes.find((n) => n.id === parentId);
-    const pos = parent ? { x: parent.position.x + 220, y: parent.position.y + 60 } : undefined;
     addTask("Nueva subtarea", parentId);
-  }, [addTask, nodes]);
+  }, [addTask]);
 
   const handleResize = useCallback((id: string, width: number, height: number) => {
     updateTask(id, { width, height });
