@@ -170,22 +170,118 @@ const Index = () => {
     setSelectedId(id);
   }, [setEdges, setNodes, findOptimalSubtaskPosition]);
 
-  const updateTask = useCallback((id: string, partial: Partial<Task>) => {
-    setTasks((prev) => ({ ...prev, [id]: { ...prev[id], ...partial } }));
-    setNodes((nds) => nds.map((n) => n.id === id ? {
-      ...n,
-      data: {
-        ...n.data,
-        title: partial.title ?? (n.data as TaskData).title,
-        status: (partial.status as Status | undefined) ?? (n.data as TaskData).status,
-        dueDate: partial.dueDate ?? (n.data as TaskData).dueDate,
-        progress: partial.progress ?? (n.data as TaskData).progress,
-        collapsed: partial.collapsed ?? (n.data as TaskData).collapsed,
-        width: partial.width ?? (n.data as TaskData).width,
-        height: partial.height ?? (n.data as TaskData).height,
+  // Helper function to synchronize status and progress
+  const synchronizeStatusAndProgress = useCallback((partial: Partial<Task>, currentTask: Task): Partial<Task> => {
+    const updated = { ...partial };
+    
+    // Si se actualiza el estado a "hecho", asegurar que el progreso sea 100%
+    if (updated.status === "hecho") {
+      updated.progress = 100;
+    }
+    
+    // Si se actualiza el progreso
+    if (updated.progress !== undefined) {
+      const newProgress = updated.progress;
+      const currentStatus = updated.status ?? currentTask.status;
+      
+      if (newProgress === 100 && currentStatus !== "hecho") {
+        // Si progreso llega a 100%, marcar como completado
+        updated.status = "hecho";
+      } else if (newProgress < 100 && currentStatus === "hecho") {
+        // Si progreso baja de 100% y estaba completado, cambiar a en progreso
+        updated.status = newProgress > 0 ? "en_progreso" : "pendiente";
+      } else if (newProgress > 0 && currentStatus === "pendiente") {
+        // Si progreso sube de 0 y estaba pendiente, cambiar a en progreso
+        updated.status = "en_progreso";
       }
-    } : n));
-  }, [setNodes]);
+    }
+    
+    return updated;
+  }, []);
+
+  const updateTask = useCallback((id: string, partial: Partial<Task>) => {
+    setTasks((prev) => {
+      const currentTask = prev[id];
+      if (!currentTask) return prev;
+      
+      // Synchronize status and progress for the current task
+      const syncedPartial = synchronizeStatusAndProgress(partial, currentTask);
+      let updatedTasks = { 
+        ...prev, 
+        [id]: { ...currentTask, ...syncedPartial } 
+      };
+      
+      // If progress changed, update parent tasks recursively
+      if (syncedPartial.progress !== undefined) {
+        const updateParentsRecursively = (taskId: string) => {
+          const parentEdges = edges.filter(e => e.target === taskId);
+          
+          parentEdges.forEach(edge => {
+            const parentId = edge.source;
+            const parentTask = updatedTasks[parentId];
+            
+            if (parentTask) {
+              // Calculate new progress based on all children
+              const childrenEdges = edges.filter(e => e.source === parentId);
+              
+              if (childrenEdges.length > 0) {
+                const childrenProgress = childrenEdges.map(childEdge => {
+                  const childTask = updatedTasks[childEdge.target];
+                  return childTask?.progress ?? 0;
+                });
+                
+                const averageProgress = Math.round(
+                  childrenProgress.reduce((sum, progress) => sum + progress, 0) / childrenProgress.length
+                );
+                
+                if (averageProgress !== parentTask.progress) {
+                  const parentSyncedUpdate = synchronizeStatusAndProgress(
+                    { progress: averageProgress }, 
+                    parentTask
+                  );
+                  
+                  updatedTasks = {
+                    ...updatedTasks,
+                    [parentId]: { ...parentTask, ...parentSyncedUpdate }
+                  };
+                  
+                  // Continue recursively up the hierarchy
+                  updateParentsRecursively(parentId);
+                }
+              }
+            }
+          });
+        };
+        
+        updateParentsRecursively(id);
+      }
+      
+      return updatedTasks;
+    });
+  }, [synchronizeStatusAndProgress, edges]);
+
+  // Update nodes when tasks change
+  useEffect(() => {
+    setNodes((nds) => nds.map((n) => {
+      const task = tasks[n.id];
+      if (task) {
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            title: task.title,
+            status: task.status as Status,
+            dueDate: task.dueDate,
+            progress: task.progress,
+            collapsed: task.collapsed,
+            width: task.width,
+            height: task.height,
+          }
+        };
+      }
+      return n;
+    }));
+  }, [tasks, setNodes]);
 
   const handleAddChild = useCallback((parentId: string) => {
     addTask("Nueva subtarea", parentId);
