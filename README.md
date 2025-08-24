@@ -1,8 +1,8 @@
 # 🧠 MindWeave Focus
 
-> **Una aplicación inteligente de mapas mentales con sidebar auto-ocultable y seguimiento de productividad**
+> **Una aplicación inteligente de mapas mentales con búsqueda avanzada, progreso automático y gestión jerárquica**
 
-MindWeave Focus es una herramienta moderna para la gestión visual de tareas y proyectos, diseñada para maximizar tu espacio de trabajo y mantener el foco en lo importante.
+MindWeave Focus es una herramienta moderna para la gestión visual de tareas y proyectos, diseñada para maximizar tu productividad con funcionalidades inteligentes como búsqueda en tiempo real, cálculo automático de progreso jerárquico y organización visual optimizada.
 
 ## ✨ Funcionalidades Principales
 
@@ -11,6 +11,22 @@ MindWeave Focus es una herramienta moderna para la gestión visual de tareas y p
 - **Máximo espacio**: Canvas se expande para aprovechar toda la pantalla
 - **Transiciones suaves**: Animaciones fluidas al mostrar/ocultar
 - **Responsive**: Se adapta perfectamente a diferentes tamaños de pantalla
+
+### 🔍 **Búsqueda Avanzada de Tareas**
+- **Búsqueda en tiempo real**: Encuentra tareas mientras escribes con debounce inteligente
+- **Resaltado visual**: Tareas que coinciden se destacan con borde azul y indicador pulsante
+- **Filtros avanzados**: Por estado (Pendiente, En Progreso, Completado), fecha límite y tareas vencidas
+- **Navegación rápida**: Haz clic en resultados para ir directamente a la tarea
+- **Subtareas colapsadas**: Encuentra y accede a subtareas ocultas automáticamente
+- **Limpieza inteligente**: Sidebar se cierra automáticamente al limpiar búsqueda
+
+### 🔄 **Gestión Jerárquica Inteligente**
+- **Colapsar/Expandir**: Oculta subtareas para mantener el tablero limpio y enfocado
+- **Contador visual**: Muestra el número de subtareas ocultas con badge animado
+- **Posicionamiento inteligente**: Nuevas subtareas aparecen automáticamente cerca del padre
+- **Progreso automático**: El progreso de tareas padre se calcula automáticamente basándose en subtareas
+- **Sincronización estado-progreso**: Estado "Completado" ↔ 100% de progreso automáticamente
+- **Jerarquía recursiva**: Cambios se propagan automáticamente por toda la cadena de tareas
 
 ### 📊 **Contador de Productividad**
 - **📈 Tareas completadas hoy**: Seguimiento diario con indicador visual
@@ -23,6 +39,7 @@ MindWeave Focus es una herramienta moderna para la gestión visual de tareas y p
 - **Estados dinámicos**: Pendiente, En Progreso, Completado con colores distintivos
 - **Fechas de vencimiento**: Alertas visuales para tareas próximas a vencer
 - **Conexiones intuitivas**: Crea relaciones entre tareas arrastrando
+- **Indicadores visuales**: Iconos de estado, prioridad y progreso automático
 
 ### 💾 **Sistema de Persistencia Robusto**
 - **Auto-guardado**: Todos los cambios se guardan automáticamente
@@ -38,15 +55,79 @@ MindWeave Focus es una herramienta moderna para la gestión visual de tareas y p
 3. **Conectar tareas**: Arrastra desde el punto de conexión de una tarjeta a otra
 4. **Redimensionar**: Selecciona una tarjeta y arrastra las esquinas
 
+### **Búsqueda y Navegación**
+- **Buscar tareas**: Usa la barra de búsqueda en el header para encontrar tareas rápidamente
+- **Filtros avanzados**: Haz clic en el ícono de filtro para buscar por estado o fecha
+- **Navegación rápida**: Haz clic en cualquier resultado para ir directamente a la tarea
+- **Limpiar búsqueda**: Usa la "X" para limpiar búsqueda y cerrar sidebar automáticamente
+
+### **Gestión de Jerarquías**
+- **Crear subtareas**: Haz clic en "Subtarea" dentro de cualquier tarjeta
+- **Colapsar/Expandir**: Usa las flechas para ocultar/mostrar subtareas
+- **Progreso automático**: El progreso de tareas padre se calcula automáticamente
+- **Estados inteligentes**: Marcar como "Completado" pone automáticamente 100% de progreso
+
 ### **Maximizar Espacio de Trabajo**
 - **Haz clic en espacio vacío** → El sidebar se oculta automáticamente
 - **Haz clic en una tarjeta** → El sidebar aparece con los detalles
 - **Usa el minimapa** → Navega fácilmente por mapas grandes
+- **Colapsa subtareas** → Mantén el tablero limpio y enfocado
 
 ### **Seguimiento de Productividad**
 - **Marca tareas como completadas** → Ve tu progreso en tiempo real
 - **Observa tu racha** → Mantén la motivación día a día
 - **Revisa tu porcentaje semanal** → Colores indican tu rendimiento
+- **Progreso jerárquico** → Ve el avance real de proyectos complejos
+
+## 💡 Casos de Uso y Ejemplos
+
+### **📋 Gestión de Proyectos**
+```
+Proyecto Web App
+├── Frontend (75%)
+│   ├── Diseño UI (100%) ✅
+│   ├── Componentes (80%) 🔄
+│   └── Integración API (50%) 🔄
+├── Backend (60%)
+│   ├── Base de datos (100%) ✅
+│   ├── API REST (70%) 🔄
+│   └── Autenticación (10%) ⏳
+└── Testing (25%)
+    ├── Unit Tests (50%) 🔄
+    └── E2E Tests (0%) ⏳
+```
+
+### **🎯 Flujo de Trabajo Típico**
+
+1. **Crear estructura del proyecto**
+   - Tarea principal: "Desarrollo App Mobile"
+   - Subtareas: Frontend, Backend, Testing, Deploy
+
+2. **Usar búsqueda para navegación rápida**
+   - Buscar "API" para encontrar todas las tareas relacionadas
+   - Filtrar por "Pendiente" para ver qué falta por hacer
+
+3. **Gestionar progreso automático**
+   - Actualizar progreso de subtareas individuales
+   - Ver cómo se actualiza automáticamente el progreso del proyecto
+
+4. **Mantener foco con colapsar/expandir**
+   - Colapsar secciones completadas
+   - Expandir solo lo que estás trabajando actualmente
+
+### **🔍 Tips de Búsqueda Avanzada**
+
+- **Buscar por contexto**: "reunión", "urgente", "cliente"
+- **Filtrar tareas vencidas**: Usar filtro "Vencidas" para priorizar
+- **Combinar filtros**: Texto + Estado + Fecha para búsquedas precisas
+- **Navegación rápida**: Clic en resultado → Ir directo a la tarea
+
+### **⚡ Productividad Máxima**
+
+- **Progreso visual**: Ve el avance real de proyectos complejos
+- **Estados automáticos**: No te preocupes por sincronizar manualmente
+- **Jerarquías claras**: Organiza desde lo general a lo específico
+- **Búsqueda instantánea**: Encuentra cualquier tarea en segundos
 
 ## 🛠️ Desarrollo Local
 
@@ -94,6 +175,7 @@ src/
 │   │   └── TaskNode.tsx          # Nodo de tarea redimensionable
 │   └── ui/
 │       ├── modern-sidebar.tsx    # Sidebar inteligente
+│       ├── search-bar.tsx        # Búsqueda avanzada con filtros
 │       ├── productivity-counter.tsx # Contador de productividad
 │       ├── data-manager.tsx      # Gestión de datos
 │       └── save-indicator.tsx    # Indicador de guardado
@@ -103,6 +185,12 @@ src/
 └── lib/
     └── storage.ts               # Sistema de persistencia robusto
 ```
+
+### **Funcionalidades Clave Implementadas**
+- **Búsqueda inteligente**: Componente SearchBar con filtros avanzados
+- **Progreso automático**: Lógica de sincronización estado-progreso
+- **Jerarquías colapsables**: Gestión de visibilidad de subtareas
+- **Posicionamiento inteligente**: Algoritmo de colocación de subtareas
 
 ## 🎨 Funcionalidades Avanzadas
 
@@ -149,14 +237,24 @@ git branch -d feature/nueva-funcionalidad
 
 ## 📈 Roadmap
 
-### **Próximas Funcionalidades**
+### **✅ Funcionalidades Completadas**
+- [x] **Búsqueda avanzada de tareas**: Búsqueda en tiempo real con filtros por estado y fecha
+- [x] **Gestión jerárquica inteligente**: Colapsar/expandir subtareas con contador visual
+- [x] **Progreso automático**: Cálculo automático de progreso padre basado en subtareas
+- [x] **Sincronización estado-progreso**: Estado "Completado" ↔ 100% automáticamente
+- [x] **Posicionamiento inteligente**: Subtareas aparecen automáticamente cerca del padre
+
+### **🚀 Próximas Funcionalidades**
 - [ ] **Templates de tareas**: Plantillas predefinidas para proyectos comunes
+- [ ] **Atajos de teclado**: Navegación rápida con shortcuts (Ctrl+F, Ctrl+N, etc.)
+- [ ] **Etiquetas/categorías**: Organización por temas con colores
+- [ ] **Modo presentación**: Vista optimizada para mostrar mapas
+- [ ] **Notificaciones**: Alertas para fechas de vencimiento
 - [ ] **Colaboración en tiempo real**: Trabajo en equipo sincronizado
 - [ ] **Integración con calendarios**: Sincronización con Google Calendar
-- [ ] **Modo presentación**: Vista optimizada para mostrar mapas
 - [ ] **Análisis avanzado**: Métricas detalladas de productividad
 
-### **Mejoras Técnicas**
+### **🔧 Mejoras Técnicas**
 - [ ] **PWA**: Aplicación web progresiva para uso offline
 - [ ] **Sincronización en la nube**: Backup automático en servicios cloud
 - [ ] **API REST**: Backend para funcionalidades avanzadas
