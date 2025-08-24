@@ -93,6 +93,7 @@ const Index = () => {
   // UI state
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isModified, setIsModified] = useState(false);
+  const [searchResults, setSearchResults] = useState<string[]>([]);
 
   // Sidebar state
   const sidebar = useSidebar({ selectedId });
@@ -190,6 +191,27 @@ const Index = () => {
     addTask("Nueva subtarea", parentId);
   }, [addTask]);
 
+  const handleSearchResults = useCallback((results: string[]) => {
+    setSearchResults(results);
+  }, []);
+
+  const handleFocusTask = useCallback((taskId: string) => {
+    setSelectedId(taskId);
+    
+    // Encontrar el nodo y hacer zoom a él
+    const node = nodes.find(n => n.id === taskId);
+    if (node) {
+      // Aquí podrías agregar lógica para hacer zoom al nodo
+      // Por ahora solo lo seleccionamos
+      console.log(`Focusing on task: ${taskId} at position:`, node.position);
+    }
+  }, [nodes]);
+
+  const handleClearSelection = useCallback(() => {
+    setSelectedId(null);
+    setSearchResults([]);
+  }, []);
+
   const handleResize = useCallback((id: string, width: number, height: number) => {
     updateTask(id, { width, height });
   }, [updateTask]);
@@ -239,6 +261,11 @@ const Index = () => {
 
   // Helper function to check if a node should be visible
   const isNodeVisible = useCallback((nodeId: string): boolean => {
+    // Si es resultado de búsqueda, siempre debe ser visible
+    if (searchResults.length > 0 && searchResults.includes(nodeId)) {
+      return true;
+    }
+    
     // Find all parent nodes by traversing edges backwards
     const parentEdges = edges.filter(e => e.target === nodeId);
     
@@ -249,15 +276,49 @@ const Index = () => {
     for (const edge of parentEdges) {
       const parentTask = tasks[edge.source];
       
-      // If parent is collapsed, this node should be hidden
-      if (parentTask?.collapsed) return false;
+      // Si el padre está colapsado, verificar si algún descendiente es resultado de búsqueda
+      if (parentTask?.collapsed) {
+        // Si hay búsqueda activa, verificar si algún descendiente coincide
+        if (searchResults.length > 0) {
+          const hasSearchResultDescendant = hasDescendantInSearchResults(edge.source);
+          if (hasSearchResultDescendant) {
+            // No ocultar si hay descendientes que coinciden con la búsqueda
+            continue;
+          } else {
+            return false;
+          }
+        } else {
+          return false;
+        }
+      }
       
       // Recursively check if parent is visible
       if (!isNodeVisible(edge.source)) return false;
     }
     
     return true;
-  }, [edges, tasks]);
+  }, [edges, tasks, searchResults]);
+
+  // Helper function to check if a node has descendants in search results
+  const hasDescendantInSearchResults = useCallback((nodeId: string): boolean => {
+    if (searchResults.length === 0) return false;
+    
+    // Get direct children
+    const directChildren = edges.filter(e => e.source === nodeId);
+    
+    for (const edge of directChildren) {
+      // If child is in search results, return true
+      if (searchResults.includes(edge.target)) {
+        return true;
+      }
+      // Recursively check descendants
+      if (hasDescendantInSearchResults(edge.target)) {
+        return true;
+      }
+    }
+    
+    return false;
+  }, [edges, searchResults]);
 
   // Helper function to count hidden children
   const getHiddenChildrenCount = useCallback((nodeId: string): number => {
@@ -300,6 +361,7 @@ const Index = () => {
       }
       
       const hiddenCount = getHiddenChildrenCount(n.id);
+      const isSearchResult = searchResults.length > 0 && searchResults.includes(n.id);
       
       return {
         ...n,
@@ -309,6 +371,7 @@ const Index = () => {
           width: t?.width || 280,
           height: t?.height || 200,
           hiddenChildrenCount: hiddenCount,
+          isSearchResult,
           onAddChild: handleAddChild,
           onToggleCollapse: (id: string) => updateTask(id, { collapsed: !tasks[id]?.collapsed }),
           onFocus: (id: string) => setSelectedId(id),
@@ -325,7 +388,7 @@ const Index = () => {
         }
       };
     });
-  }, [visibleNodes, tasks, handleAddChild, updateTask, setNodes, setEdges, handleResize, getHiddenChildrenCount]);
+  }, [visibleNodes, tasks, handleAddChild, updateTask, setNodes, setEdges, handleResize, getHiddenChildrenCount, searchResults]);
 
   const onConnect = useCallback((params: Edge | Connection) => 
     setEdges((eds) => addEdge({ ...params, markerEnd: { type: MarkerType.ArrowClosed } }, eds)), 
@@ -333,7 +396,13 @@ const Index = () => {
   );
 
   const onSelectionChange = useCallback(({ nodes: nds }: { nodes: Node[] }) => {
-    setSelectedId(nds[0]?.id ?? null);
+    const newSelectedId = nds[0]?.id ?? null;
+    setSelectedId(newSelectedId);
+    
+    // Si no hay selección, limpiar también los resultados de búsqueda
+    if (!newSelectedId) {
+      setSearchResults([]);
+    }
   }, []);
 
   // Load initial data
@@ -379,6 +448,9 @@ const Index = () => {
         completedCount={completedCount}
         onDataImported={handleDataImported}
         tasks={tasks}
+        onSearchResults={handleSearchResults}
+        onFocusTask={handleFocusTask}
+        onClearSelection={handleClearSelection}
       />
 
       <main className={cn(

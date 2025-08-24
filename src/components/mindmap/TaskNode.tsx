@@ -31,6 +31,7 @@ export type TaskData = {
   width?: number;
   height?: number;
   hiddenChildrenCount?: number;
+  isSearchResult?: boolean;
   onAddChild?: (id: string) => void;
   onToggleCollapse?: (id: string) => void;
   onFocus?: (id: string) => void;
@@ -93,6 +94,7 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
       "ring-2 ring-red-500/50 shadow-red-500/20": d.highlight === "overdue",
       "ring-2 ring-yellow-500/50 shadow-yellow-500/20": d.highlight === "soon",
       "ring-2 ring-primary/50 shadow-primary/20": selected,
+      "ring-2 ring-blue-400/60 shadow-blue-400/30 bg-blue-50/50 dark:bg-blue-950/20": d.isSearchResult && !selected,
       "hover:scale-[1.02]": !selected && !isResizing,
       "scale-[1.02]": selected
     }
@@ -275,6 +277,11 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
           </Button>
         </div>
       </div>
+
+      {/* Search Result Indicator */}
+      {d.isSearchResult && (
+        <div className="absolute -top-1 -left-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse" />
+      )}
 
       {/* Completion Indicator */}
       {d.status === "hecho" && (
