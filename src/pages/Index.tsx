@@ -197,9 +197,59 @@ const Index = () => {
     }
   }, [edges, selectedId, setNodes, setEdges]);
 
+  // Helper function to check if a node should be visible
+  const isNodeVisible = useCallback((nodeId: string): boolean => {
+    // Find all parent nodes by traversing edges backwards
+    const parentEdges = edges.filter(e => e.target === nodeId);
+    
+    // If no parents, it's a root node - always visible
+    if (parentEdges.length === 0) return true;
+    
+    // Check each parent path
+    for (const edge of parentEdges) {
+      const parentTask = tasks[edge.source];
+      
+      // If parent is collapsed, this node should be hidden
+      if (parentTask?.collapsed) return false;
+      
+      // Recursively check if parent is visible
+      if (!isNodeVisible(edge.source)) return false;
+    }
+    
+    return true;
+  }, [edges, tasks]);
+
+  // Helper function to count hidden children
+  const getHiddenChildrenCount = useCallback((nodeId: string): number => {
+    const task = tasks[nodeId];
+    if (!task?.collapsed) return 0;
+    
+    // Get direct children
+    const directChildren = edges.filter(e => e.source === nodeId);
+    let count = directChildren.length;
+    
+    // Recursively count all descendants
+    for (const edge of directChildren) {
+      count += getHiddenChildrenCount(edge.target);
+    }
+    
+    return count;
+  }, [edges, tasks]);
+
+  // Filter visible nodes and edges
+  const visibleNodes = useMemo(() => {
+    return nodes.filter(node => isNodeVisible(node.id));
+  }, [nodes, isNodeVisible]);
+
+  const visibleEdges = useMemo(() => {
+    return edges.filter(edge => 
+      isNodeVisible(edge.source) && isNodeVisible(edge.target)
+    );
+  }, [edges, isNodeVisible]);
+
   // Compute nodes with callbacks
   const nodesWithCallbacks = useMemo(() => {
-    return nodes.map((n) => {
+    return visibleNodes.map((n) => {
       const t = tasks[n.id];
       let highlight: TaskData["highlight"] = null;
       if (t?.dueDate) {
@@ -209,6 +259,8 @@ const Index = () => {
         else if (d < now + 1000 * 60 * 60 * 48) highlight = "soon";
       }
       
+      const hiddenCount = getHiddenChildrenCount(n.id);
+      
       return {
         ...n,
         data: {
@@ -216,6 +268,7 @@ const Index = () => {
           highlight,
           width: t?.width || 280,
           height: t?.height || 200,
+          hiddenChildrenCount: hiddenCount,
           onAddChild: handleAddChild,
           onToggleCollapse: (id: string) => updateTask(id, { collapsed: !tasks[id]?.collapsed }),
           onFocus: (id: string) => setSelectedId(id),
@@ -232,7 +285,7 @@ const Index = () => {
         }
       };
     });
-  }, [nodes, tasks, handleAddChild, updateTask, setNodes, setEdges, handleResize]);
+  }, [visibleNodes, tasks, handleAddChild, updateTask, setNodes, setEdges, handleResize, getHiddenChildrenCount]);
 
   const onConnect = useCallback((params: Edge | Connection) => 
     setEdges((eds) => addEdge({ ...params, markerEnd: { type: MarkerType.ArrowClosed } }, eds)), 
@@ -297,7 +350,7 @@ const Index = () => {
         <section aria-label="Lienzo del Mapa Mental" className="relative overflow-hidden w-full h-full">
           <ReactFlow
             nodes={nodesWithCallbacks}
-            edges={edges}
+            edges={visibleEdges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}

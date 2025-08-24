@@ -30,6 +30,7 @@ export type TaskData = {
   highlight?: "overdue" | "soon" | null;
   width?: number;
   height?: number;
+  hiddenChildrenCount?: number;
   onAddChild?: (id: string) => void;
   onToggleCollapse?: (id: string) => void;
   onFocus?: (id: string) => void;
@@ -144,19 +145,28 @@ const TaskNode = memo(({ id, data, selected }: NodeProps) => {
       {/* Header */}
       <header className="p-4 border-b border-border/50">
         <div className="flex items-start gap-3">
-          <button
-            className="inline-flex items-center justify-center shrink-0 nodrag mt-0.5 hover:bg-accent rounded-md p-1 transition-colors"
-            aria-label={d.collapsed ? "Expandir" : "Colapsar"}
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              d.onToggleCollapse?.(id); 
-            }}
-          >
-            {d.collapsed ? 
-              <ChevronRight className="h-4 w-4" /> : 
-              <ChevronDown className="h-4 w-4" />
-            }
-          </button>
+          <div className="relative">
+            <button
+              className="inline-flex items-center justify-center shrink-0 nodrag mt-0.5 hover:bg-accent rounded-md p-1 transition-colors"
+              aria-label={d.collapsed ? "Expandir" : "Colapsar"}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                d.onToggleCollapse?.(id); 
+              }}
+            >
+              {d.collapsed ? 
+                <ChevronRight className="h-4 w-4" /> : 
+                <ChevronDown className="h-4 w-4" />
+              }
+            </button>
+            
+            {/* Contador de subtareas ocultas */}
+            {d.collapsed && d.hiddenChildrenCount && d.hiddenChildrenCount > 0 && (
+              <div className="absolute -top-1 -right-1 h-4 w-4 bg-primary text-primary-foreground rounded-full flex items-center justify-center text-xs font-medium animate-scale-in">
+                {d.hiddenChildrenCount > 9 ? '9+' : d.hiddenChildrenCount}
+              </div>
+            )}
+          </div>
           
           <div className="flex-1 min-w-0">
             <h3 
