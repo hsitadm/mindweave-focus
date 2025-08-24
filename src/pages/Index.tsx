@@ -18,6 +18,8 @@ import TaskNode, { TaskData, Status } from "@/components/mindmap/TaskNode";
 import { ModernHeaderSimple } from "@/components/ui/modern-header-simple";
 import { SaveIndicator } from "@/components/ui/save-indicator";
 import { ModernSidebar } from "@/components/ui/modern-sidebar";
+import { ViewNavigation } from "@/components/ui/view-navigation";
+import { EmptyFocusState } from "@/components/ui/empty-focus-state";
 import { loadFromStorage, autoSave, type MindMapData } from "@/lib/storage";
 import { useSidebar } from "@/hooks/useSidebar";
 import { cn } from "@/lib/utils";
@@ -35,7 +37,102 @@ export type Task = {
   collapsed?: boolean;
   width?: number;
   height?: number;
+  inFocus?: boolean; // Nueva propiedad para modo enfoque
+  colorScheme?: string; // Nueva propiedad para esquema de color del proyecto
 };
+
+// Tipos para vista de capas
+export type ViewMode = "overview" | "project" | "focus";
+
+export type ViewState = {
+  mode: ViewMode;
+  currentProjectId?: string | null;
+  breadcrumbs: { id: string; title: string }[];
+};
+
+// Paleta de colores para proyectos
+export const PROJECT_COLOR_SCHEMES = [
+  {
+    name: "blue",
+    primary: "#3B82F6",
+    light: "#DBEAFE", 
+    dark: "#1E40AF",
+    border: "border-blue-500",
+    bg: "bg-blue-50",
+    text: "text-blue-700",
+    progress: "from-blue-400 to-blue-600"
+  },
+  {
+    name: "green", 
+    primary: "#10B981",
+    light: "#D1FAE5",
+    dark: "#047857",
+    border: "border-green-500",
+    bg: "bg-green-50", 
+    text: "text-green-700",
+    progress: "from-green-400 to-green-600"
+  },
+  {
+    name: "orange",
+    primary: "#F59E0B", 
+    light: "#FEF3C7",
+    dark: "#D97706",
+    border: "border-orange-500",
+    bg: "bg-orange-50",
+    text: "text-orange-700", 
+    progress: "from-orange-400 to-orange-600"
+  },
+  {
+    name: "purple",
+    primary: "#8B5CF6",
+    light: "#EDE9FE", 
+    dark: "#7C3AED",
+    border: "border-purple-500",
+    bg: "bg-purple-50",
+    text: "text-purple-700",
+    progress: "from-purple-400 to-purple-600"
+  },
+  {
+    name: "pink",
+    primary: "#EC4899",
+    light: "#FCE7F3",
+    dark: "#BE185D", 
+    border: "border-pink-500",
+    bg: "bg-pink-50",
+    text: "text-pink-700",
+    progress: "from-pink-400 to-pink-600"
+  },
+  {
+    name: "indigo",
+    primary: "#6366F1",
+    light: "#E0E7FF",
+    dark: "#4F46E5",
+    border: "border-indigo-500", 
+    bg: "bg-indigo-50",
+    text: "text-indigo-700",
+    progress: "from-indigo-400 to-indigo-600"
+  },
+  {
+    name: "teal",
+    primary: "#14B8A6",
+    light: "#CCFBF1",
+    dark: "#0F766E",
+    border: "border-teal-500",
+    bg: "bg-teal-50", 
+    text: "text-teal-700",
+    progress: "from-teal-400 to-teal-600"
+  },
+  {
+    name: "red",
+    primary: "#EF4444", 
+    light: "#FEE2E2",
+    dark: "#DC2626",
+    border: "border-red-500",
+    bg: "bg-red-50",
+    text: "text-red-700",
+    progress: "from-red-400 to-red-600"
+  }
+];
 
 const STORAGE_KEY = "mindmap-data-v1";
 
@@ -94,6 +191,13 @@ const Index = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isModified, setIsModified] = useState(false);
   const [searchResults, setSearchResults] = useState<string[]>([]);
+  
+  // View state for layered navigation
+  const [viewState, setViewState] = useState<ViewState>({
+    mode: "overview",
+    currentProjectId: null,
+    breadcrumbs: []
+  });
 
   // Sidebar state
   const sidebar = useSidebar({ selectedId });
@@ -127,9 +231,76 @@ const Index = () => {
     };
   }, [nodes, edges]);
 
+  // Color management functions
+  const getNextAvailableColorScheme = useCallback(() => {
+    const parentTasks = Object.values(tasks).filter(t => !t.parentId);
+    const usedColors = parentTasks.map(t => t.colorScheme).filter(Boolean);
+    
+    // Find first unused color scheme
+    const availableScheme = PROJECT_COLOR_SCHEMES.find(scheme => 
+      !usedColors.includes(scheme.name)
+    );
+    
+    // If all colors are used, cycle back based on number of parent tasks
+    if (!availableScheme) {
+      const colorIndex = parentTasks.length % PROJECT_COLOR_SCHEMES.length;
+      return PROJECT_COLOR_SCHEMES[colorIndex].name;
+    }
+    
+    return availableScheme.name;
+  }, [tasks]);
+
+  const getColorScheme = useCallback((colorName: string) => {
+    return PROJECT_COLOR_SCHEMES.find(scheme => scheme.name === colorName) || PROJECT_COLOR_SCHEMES[0];
+  }, []);
+
+  const getTaskColorScheme = useCallback((taskId: string): string => {
+    const task = tasks[taskId];
+    if (!task) return PROJECT_COLOR_SCHEMES[0].name;
+    
+    // If task has a color scheme, use it
+    if (task.colorScheme) return task.colorScheme;
+    
+    // If task has parent, inherit parent's color
+    if (task.parentId) {
+      return getTaskColorScheme(task.parentId);
+    }
+    
+    // For parent tasks without colorScheme, assign one based on their position
+    const parentTasks = Object.values(tasks).filter(t => !t.parentId);
+    const taskIndex = parentTasks.findIndex(t => t.id === taskId);
+    if (taskIndex >= 0) {
+      const colorIndex = taskIndex % PROJECT_COLOR_SCHEMES.length;
+      return PROJECT_COLOR_SCHEMES[colorIndex].name;
+    }
+    
+    // Default color for orphaned tasks
+    return PROJECT_COLOR_SCHEMES[0].name;
+  }, [tasks]);
+
   const addTask = useCallback((title = "Nueva tarea", parentId: string | null = null, customPosition?: { x: number; y: number }) => {
     const id = crypto.randomUUID();
-    const task: Task = { id, title, status: "pendiente", progress: 0, parentId, width: 280, height: 200 };
+    
+    // Determine color scheme
+    let colorScheme: string;
+    if (parentId) {
+      // Inherit parent's color scheme
+      colorScheme = getTaskColorScheme(parentId);
+    } else {
+      // Assign next available color for new parent task
+      colorScheme = getNextAvailableColorScheme();
+    }
+    
+    const task: Task = { 
+      id, 
+      title, 
+      status: "pendiente", 
+      progress: 0, 
+      parentId, 
+      width: 280, 
+      height: 200,
+      colorScheme
+    };
     
     // Calcular posición inteligente
     let position = customPosition;
@@ -152,7 +323,8 @@ const Index = () => {
         status: task.status, 
         progress: 0,
         width: task.width,
-        height: task.height
+        height: task.height,
+        colorScheme
       } as TaskData,
       position,
     };
@@ -160,15 +332,20 @@ const Index = () => {
     setTasks((prev) => ({ ...prev, [id]: task }));
     setNodes((nds) => nds.concat(node));
     if (parentId) {
+      const colorConfig = getColorScheme(colorScheme);
       setEdges((eds) => eds.concat({ 
         id: crypto.randomUUID(), 
         source: parentId, 
         target: id, 
-        markerEnd: { type: MarkerType.ArrowClosed } 
+        markerEnd: { type: MarkerType.ArrowClosed },
+        style: { 
+          strokeWidth: 2,
+          stroke: colorConfig.primary
+        }
       }));
     }
     setSelectedId(id);
-  }, [setEdges, setNodes, findOptimalSubtaskPosition]);
+  }, [setEdges, setNodes, findOptimalSubtaskPosition, getNextAvailableColorScheme, getTaskColorScheme, getColorScheme]);
 
   // Helper function to synchronize status and progress
   const synchronizeStatusAndProgress = useCallback((partial: Partial<Task>, currentTask: Task): Partial<Task> => {
@@ -308,6 +485,51 @@ const Index = () => {
     setSearchResults([]);
   }, []);
 
+  // View navigation functions
+  const navigateToProject = useCallback((projectId: string) => {
+    const project = tasks[projectId];
+    if (project) {
+      setViewState({
+        mode: "project",
+        currentProjectId: projectId,
+        breadcrumbs: [
+          { id: "overview", title: "Vista General" },
+          { id: projectId, title: project.title }
+        ]
+      });
+    }
+  }, [tasks]);
+
+  const navigateToOverview = useCallback(() => {
+    setViewState({
+      mode: "overview",
+      currentProjectId: null,
+      breadcrumbs: []
+    });
+  }, []);
+
+  const navigateToFocusMode = useCallback(() => {
+    setViewState({
+      mode: "focus",
+      currentProjectId: null,
+      breadcrumbs: [{ id: "focus", title: "Modo Enfoque" }]
+    });
+  }, []);
+
+  const toggleTaskFocus = useCallback((taskId: string) => {
+    updateTask(taskId, { inFocus: !tasks[taskId]?.inFocus });
+  }, [tasks, updateTask]);
+
+  const navigateToBreadcrumb = useCallback((breadcrumbId: string) => {
+    if (breadcrumbId === "overview") {
+      navigateToOverview();
+    } else if (breadcrumbId === "focus") {
+      navigateToFocusMode();
+    } else {
+      navigateToProject(breadcrumbId);
+    }
+  }, [navigateToOverview, navigateToFocusMode, navigateToProject]);
+
   const handleResize = useCallback((id: string, width: number, height: number) => {
     updateTask(id, { width, height });
   }, [updateTask]);
@@ -355,8 +577,65 @@ const Index = () => {
     }
   }, [edges, selectedId, setNodes, setEdges]);
 
-  // Helper function to check if a node should be visible
+  // Helper function to check if a node should be visible based on current view
+  const isNodeVisibleInCurrentView = useCallback((nodeId: string): boolean => {
+    const task = tasks[nodeId];
+    if (!task) return false;
+
+    switch (viewState.mode) {
+      case "overview":
+        // Solo mostrar tareas padre (sin parentId)
+        return !task.parentId;
+        
+      case "project":
+        // Mostrar solo tareas del proyecto actual y sus descendientes
+        if (!viewState.currentProjectId) return false;
+        
+        // Si es el proyecto actual, mostrarlo
+        if (nodeId === viewState.currentProjectId) return true;
+        
+        // Si es descendiente del proyecto actual, mostrarlo
+        return isDescendantOf(nodeId, viewState.currentProjectId);
+        
+      case "focus":
+        // Mostrar tareas marcadas como "en foco" y sus padres necesarios para navegación
+        if (task.inFocus) return true;
+        
+        // También mostrar si es padre de una tarea en foco (para mantener jerarquía)
+        return hasDescendantInFocus(nodeId);
+        
+      default:
+        return true;
+    }
+  }, [tasks, viewState]);
+
+  // Helper function to check if a task is descendant of another
+  const isDescendantOf = useCallback((taskId: string, ancestorId: string): boolean => {
+    const task = tasks[taskId];
+    if (!task || !task.parentId) return false;
+    
+    if (task.parentId === ancestorId) return true;
+    return isDescendantOf(task.parentId, ancestorId);
+  }, [tasks]);
+
+  // Helper function to check if a task has any descendant in focus
+  const hasDescendantInFocus = useCallback((taskId: string): boolean => {
+    const childrenEdges = edges.filter(e => e.source === taskId);
+    
+    for (const edge of childrenEdges) {
+      const childTask = tasks[edge.target];
+      if (childTask?.inFocus) return true;
+      if (hasDescendantInFocus(edge.target)) return true;
+    }
+    
+    return false;
+  }, [edges, tasks]);
+
+  // Helper function to check if a node should be visible (combining search and view filters)
   const isNodeVisible = useCallback((nodeId: string): boolean => {
+    // First check if visible in current view
+    if (!isNodeVisibleInCurrentView(nodeId)) return false;
+    
     // Si es resultado de búsqueda, siempre debe ser visible
     if (searchResults.length > 0 && searchResults.includes(nodeId)) {
       return true;
@@ -365,7 +644,7 @@ const Index = () => {
     // Find all parent nodes by traversing edges backwards
     const parentEdges = edges.filter(e => e.target === nodeId);
     
-    // If no parents, it's a root node - always visible
+    // If no parents, it's a root node - visible if passes view filter
     if (parentEdges.length === 0) return true;
     
     // Check each parent path
@@ -393,7 +672,7 @@ const Index = () => {
     }
     
     return true;
-  }, [edges, tasks, searchResults]);
+  }, [edges, tasks, searchResults, isNodeVisibleInCurrentView]);
 
   // Helper function to check if a node has descendants in search results
   const hasDescendantInSearchResults = useCallback((nodeId: string): boolean => {
@@ -441,8 +720,20 @@ const Index = () => {
   const visibleEdges = useMemo(() => {
     return edges.filter(edge => 
       isNodeVisible(edge.source) && isNodeVisible(edge.target)
-    );
-  }, [edges, isNodeVisible]);
+    ).map(edge => {
+      // Apply project color to edge
+      const sourceColorScheme = getTaskColorScheme(edge.source);
+      const colorConfig = getColorScheme(sourceColorScheme);
+      
+      return {
+        ...edge,
+        style: {
+          strokeWidth: 2,
+          stroke: colorConfig.primary
+        }
+      };
+    });
+  }, [edges, isNodeVisible, getTaskColorScheme, getColorScheme]);
 
   // Compute nodes with callbacks
   const nodesWithCallbacks = useMemo(() => {
@@ -458,6 +749,8 @@ const Index = () => {
       
       const hiddenCount = getHiddenChildrenCount(n.id);
       const isSearchResult = searchResults.length > 0 && searchResults.includes(n.id);
+      const isParentTask = edges.some(e => e.source === n.id); // Tiene hijos
+      const taskColorScheme = getTaskColorScheme(n.id);
       
       return {
         ...n,
@@ -468,6 +761,9 @@ const Index = () => {
           height: t?.height || 200,
           hiddenChildrenCount: hiddenCount,
           isSearchResult,
+          inFocus: t?.inFocus || false,
+          isParentTask,
+          colorScheme: taskColorScheme,
           onAddChild: handleAddChild,
           onToggleCollapse: (id: string) => updateTask(id, { collapsed: !tasks[id]?.collapsed }),
           onFocus: (id: string) => setSelectedId(id),
@@ -480,11 +776,13 @@ const Index = () => {
             });
             setEdges((eds) => eds.filter((e) => e.source !== id && e.target !== id));
           },
-          onResize: handleResize
+          onResize: handleResize,
+          onToggleFocus: toggleTaskFocus,
+          onDrillDown: navigateToProject
         }
       };
     });
-  }, [visibleNodes, tasks, handleAddChild, updateTask, setNodes, setEdges, handleResize, getHiddenChildrenCount, searchResults]);
+  }, [visibleNodes, tasks, handleAddChild, updateTask, setNodes, setEdges, handleResize, getHiddenChildrenCount, searchResults, edges, toggleTaskFocus, navigateToProject, getTaskColorScheme]);
 
   const onConnect = useCallback((params: Edge | Connection) => 
     setEdges((eds) => addEdge({ ...params, markerEnd: { type: MarkerType.ArrowClosed } }, eds)), 
@@ -534,6 +832,7 @@ const Index = () => {
   // Calculate stats
   const taskCount = Object.keys(tasks).length;
   const completedCount = Object.values(tasks).filter(t => t.status === "hecho").length;
+  const focusedTasksCount = Object.values(tasks).filter(t => t.inFocus).length;
   const selectedTask = selectedId ? tasks[selectedId] : undefined;
 
   return (
@@ -549,42 +848,58 @@ const Index = () => {
         onClearSelection={handleClearSelection}
       />
 
+      <ViewNavigation
+        viewState={viewState}
+        onNavigateToBreadcrumb={navigateToBreadcrumb}
+        onNavigateToOverview={navigateToOverview}
+        onNavigateToFocusMode={navigateToFocusMode}
+        focusedTasksCount={focusedTasksCount}
+      />
+
       <main className={cn(
         "transition-all duration-300 w-full",
         sidebar.isVisible && sidebar.isExpanded 
-          ? "grid grid-cols-1 lg:grid-cols-[1fr_400px] h-[calc(100vh-64px)]"
-          : "h-[calc(100vh-64px)]"
+          ? "grid grid-cols-1 lg:grid-cols-[1fr_400px] h-[calc(100vh-128px)]"
+          : "h-[calc(100vh-128px)]"
       )}>
         <section aria-label="Lienzo del Mapa Mental" className="relative overflow-hidden w-full h-full">
-          <ReactFlow
-            nodes={nodesWithCallbacks}
-            edges={visibleEdges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onSelectionChange={onSelectionChange}
-            nodeTypes={nodeTypes}
-            connectionMode={ConnectionMode.Loose}
-            fitView
-            className="w-full h-full bg-gradient-to-br from-background to-muted/20"
-          >
-            <Background 
-              variant="dots" 
-              gap={20} 
-              size={1} 
-              className="opacity-30"
+          {/* Mostrar estado vacío en modo enfoque si no hay tareas enfocadas */}
+          {viewState.mode === "focus" && focusedTasksCount === 0 ? (
+            <EmptyFocusState
+              onNavigateToOverview={navigateToOverview}
+              onAddTask={() => addTask("Nueva tarea", null)}
             />
-            <MiniMap 
-              zoomable 
-              pannable 
-              className="!bg-card/80 !border-border/50 backdrop-blur-sm rounded-lg"
-              nodeClassName="!fill-primary/60"
-            />
-            <Controls 
-              className="!bg-card/80 !border-border/50 backdrop-blur-sm rounded-lg"
-              showInteractive={false}
-            />
-          </ReactFlow>
+          ) : (
+            <ReactFlow
+              nodes={nodesWithCallbacks}
+              edges={visibleEdges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onSelectionChange={onSelectionChange}
+              nodeTypes={nodeTypes}
+              connectionMode={ConnectionMode.Loose}
+              fitView
+              className="w-full h-full bg-gradient-to-br from-background to-muted/20"
+            >
+              <Background 
+                variant="dots" 
+                gap={20} 
+                size={1} 
+                className="opacity-30"
+              />
+              <MiniMap 
+                zoomable 
+                pannable 
+                className="!bg-card/80 !border-border/50 backdrop-blur-sm rounded-lg"
+                nodeClassName="!fill-primary/60"
+              />
+              <Controls 
+                className="!bg-card/80 !border-border/50 backdrop-blur-sm rounded-lg"
+                showInteractive={false}
+              />
+            </ReactFlow>
+          )}
         </section>
 
         <ModernSidebar
